@@ -7,8 +7,8 @@
 
 import UIKit
 
-final class LocationRadiusPickerController: UIViewController {
-    override func viewDidLoad() {
+public final class LocationRadiusPickerController: UIViewController {
+    override public func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = .red
