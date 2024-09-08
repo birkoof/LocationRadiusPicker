@@ -5,6 +5,7 @@
 //  Created by Eman Basic on 08.09.24.
 //
 
+import LocationRadiusPicker
 import UIKit
 
 class ViewController: UIViewController {
@@ -50,6 +51,6 @@ extension ViewController {
 
 extension ViewController {
     private func onOpenPickerButtonPressed() {
-        
+        present(LocationRadiusPickerController(), animated: true)
     }
 }
