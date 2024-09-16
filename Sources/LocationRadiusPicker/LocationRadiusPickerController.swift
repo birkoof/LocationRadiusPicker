@@ -8,22 +8,6 @@
 import MapKit
 import UIKit
 
-public struct LocationRadiusPickerConfiguration {
-    var title: String
-    var saveButtonTitle: String
-    var cancelButtonTitle: String
-    var radius: CLLocationDistance
-    var minimumRadius: Double
-    var maximumRadius: Double
-    var location: CLLocationCoordinate2D
-    var radiusBorderColor: UIColor
-    var radiusColor: UIColor
-    var radiusLabelColor: UIColor
-    var grabberColor: UIColor
-    var grabberSize: CGFloat = 20
-    var useMetricSystem: Bool = true
-}
-
 public final class LocationRadiusPickerController: UIViewController {
     
     // MARK: - Views
@@ -41,7 +25,7 @@ public final class LocationRadiusPickerController: UIViewController {
     private lazy var circleView: UIView = {
         let view = UIView()
         view.layer.borderColor = configuration.radiusBorderColor.cgColor
-        view.layer.borderWidth = 3
+        view.layer.borderWidth = configuration.radiusBorderWidth
         view.backgroundColor = configuration.radiusColor
         view.isHidden = true
         return view
@@ -58,12 +42,11 @@ public final class LocationRadiusPickerController: UIViewController {
     
     private lazy var radiusLabel: UILabel = {
         let view = UILabel()
-        view.font = UIFont.systemFont(ofSize: 14, weight: .semibold) // TODO: font & shadow
+        view.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
         view.textColor = configuration.radiusLabelColor
         view.isHidden = true
         return view
     }()
-    
     
     // MARK: - Private properties
     
@@ -96,7 +79,7 @@ public final class LocationRadiusPickerController: UIViewController {
         didSet {
             let measurement = Measurement<UnitLength>(value: currentRadius, unit: .meters)
             // TODO: this needs improvement
-            let threshold = configuration.useMetricSystem ? 1000.0 : 805.0
+            let threshold = configuration.unitSystem == .metric ? 1000.0 : 805.0
             let formatter = currentRadius < threshold ? zeroDecimalDistanceFormatter : oneDecimalDistanceFormatter
             radiusLabel.text = formatter.string(from: measurement)
         }
@@ -190,7 +173,7 @@ extension LocationRadiusPickerController: MKMapViewDelegate {
             let circleRenderer = MKCircleRenderer(circle: circleOverlay)
             circleRenderer.fillColor = configuration.radiusColor
             circleRenderer.strokeColor = configuration.radiusBorderColor
-            circleRenderer.lineWidth = 3
+            circleRenderer.lineWidth = configuration.radiusBorderWidth
             return circleRenderer
         }
         
@@ -232,7 +215,7 @@ extension LocationRadiusPickerController: MKMapViewDelegate {
     }
     
     private func setVisibleMapRegionForCircle() {
-        let padding = currentRadius * 17
+        let padding = currentRadius * 17 // TODO: include padding in the configuration
         let paddedRect = circle.boundingMapRect.insetBy(dx: -padding, dy: -padding)
         mapView.setVisibleMapRect(paddedRect, edgePadding: .zero, animated: false)
         
@@ -326,7 +309,7 @@ extension LocationRadiusPickerController {
             grabberView.center.x = newGrabberPosition
             currentRadius = newRadius
             
-            if newRadius.truncatingRemainder(dividingBy: 3).rounded() == 0 {
+            if configuration.vibrateOnResize, newRadius.truncatingRemainder(dividingBy: 3).rounded() == 0 {
                 // vibrate on pan
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             }
@@ -354,20 +337,8 @@ extension LocationRadiusPickerController {
 
 @available(iOS 17.0, *)
 #Preview {
-    let config = LocationRadiusPickerConfiguration(
-        title: "Location Radius Picker",
-        saveButtonTitle: "Save",
-        cancelButtonTitle: "Cancel",
-        radius: 100,
-        minimumRadius: 50,
-        maximumRadius: 2000,
-        location: CLLocationCoordinate2D(latitude: 37.331711, longitude: -122.030773),
-        radiusBorderColor: .secondaryLabel.withAlphaComponent(1),
-        radiusColor: .secondaryLabel.withAlphaComponent(0.2),
-        radiusLabelColor: .secondaryLabel.withAlphaComponent(1),
-        grabberColor: .secondaryLabel.withAlphaComponent(1),
-        grabberSize: 20
-    )
+    let config = LocationRadiusPickerConfigurationBuilder(initialRadius: 100, minimumRadius: 50, maximumRadius: 2000)
+        .build()
     
     return UINavigationController(rootViewController: LocationRadiusPickerController(configuration: config))
 }
