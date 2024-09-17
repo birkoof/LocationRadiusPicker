@@ -7,12 +7,30 @@
 
 import Foundation
 
-/// Represents the unit system used by the picker to represent distance values
+/// Enum representing the unit system type.
 public enum UnitSystemType {
-    /// Metric unit system, e.g. 100 meters
+    /// The metric system (meters, kilometres, etc.).
     case metric
-    /// Imperial unit system, e.g. 100 feet
+    
+    /// The imperial system (feet, miles, etc.).
     case imperial
-    /// Follow system setting
+    
+    /// The system type determined by the user's device settings.
     case system
+
+    /// Automatically determines the appropriate unit system based on the current locale.
+    static var current: UnitSystemType {
+        if #available(iOS 16, *) {
+            Locale.current.measurementSystem == .metric ? .metric : .imperial
+        } else {
+            Locale.current.usesMetricSystem ? .metric : .imperial
+        }
+    }
+}
+
+fileprivate extension Locale {
+    /// Property to determine if the locale uses the metric system.
+    var usesMetricSystem: Bool {
+        (self as NSLocale).object(forKey: .measurementSystem) as? String == "Metric"
+    }
 }
