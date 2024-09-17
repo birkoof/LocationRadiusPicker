@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  LocationRadiusPickerConfigurationBuilder.swift
+//
 //
 //  Created by Eman Basic on 16.09.24.
 //
