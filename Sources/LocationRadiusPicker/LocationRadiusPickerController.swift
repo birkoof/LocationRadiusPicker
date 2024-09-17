@@ -49,22 +49,8 @@ public final class LocationRadiusPickerController: UIViewController {
     }()
     
     // MARK: - Private properties
-    
-    private let oneDecimalDistanceFormatter: MeasurementFormatter = {
-        let formatter = MeasurementFormatter()
-        formatter.unitStyle = .medium
-        formatter.unitOptions = .naturalScale
-        formatter.numberFormatter.maximumFractionDigits = 1
-        return formatter
-    }()
-    
-    private let zeroDecimalDistanceFormatter: MeasurementFormatter = {
-        let formatter = MeasurementFormatter()
-        formatter.unitStyle = .medium
-        formatter.unitOptions = .naturalScale
-        formatter.numberFormatter.maximumFractionDigits = 0
-        return formatter
-    }()
+        
+    private let isMetricSystem: Bool
     
     private var circle: MKCircle
     private var currentLocation: CLLocationCoordinate2D
@@ -77,11 +63,7 @@ public final class LocationRadiusPickerController: UIViewController {
 
     private var currentRadius: CLLocationDistance {
         didSet {
-            let measurement = Measurement<UnitLength>(value: currentRadius, unit: .meters)
-            // TODO: this needs improvement
-            let threshold = configuration.unitSystem == .metric ? 1000.0 : 805.0
-            let formatter = currentRadius < threshold ? zeroDecimalDistanceFormatter : oneDecimalDistanceFormatter
-            radiusLabel.text = formatter.string(from: measurement)
+            updateRadiusLabel(with: currentRadius)
         }
     }
     
@@ -100,6 +82,12 @@ public final class LocationRadiusPickerController: UIViewController {
         currentRadius = radius
         
         circle = MKCircle(center: configuration.location, radius: radius)
+        
+        isMetricSystem = switch configuration.unitSystem {
+            case .metric: true
+            case .imperial: false
+            case .system: UnitSystemType.current == .metric
+        }
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -207,9 +195,7 @@ extension LocationRadiusPickerController: MKMapViewDelegate {
         grabberView.center.x += diameter / 2
         view.addSubview(grabberView)
         
-        let measurement = Measurement<UnitLength>(value: currentRadius, unit: .meters)
-        let formatter = currentRadius < 1000 ? zeroDecimalDistanceFormatter : oneDecimalDistanceFormatter
-        radiusLabel.text = formatter.string(from: measurement)
+        updateRadiusLabel(with: currentRadius)
         setRadiusLabelFrame()
         view.addSubview(radiusLabel)
     }
@@ -333,11 +319,33 @@ extension LocationRadiusPickerController {
     }
 }
 
+// MARK: - Helper
+
+extension LocationRadiusPickerController {
+    private func updateRadiusLabel(with radius: Double) {
+        let measurement = Measurement<UnitLength>(value: currentRadius, unit: .meters)
+
+        let formatter = MeasurementFormatter()
+        formatter.unitStyle = .medium
+        formatter.unitOptions = .naturalScale
+        
+        if isMetricSystem {
+            formatter.numberFormatter.maximumFractionDigits = radius >= 1000 ? 1 : 0
+        } else {
+            formatter.locale = Locale(identifier: "en_US")
+            formatter.numberFormatter.maximumFractionDigits = radius >= 804 ? 1 : 0
+        }
+        
+        radiusLabel.text = formatter.string(from: measurement)
+    }
+}
+
 // MARK: - Preview
 
 @available(iOS 17.0, *)
 #Preview {
-    let config = LocationRadiusPickerConfigurationBuilder(initialRadius: 100, minimumRadius: 50, maximumRadius: 2000)
+    let config = LocationRadiusPickerConfigurationBuilder(initialRadius: 300, minimumRadius: 30, maximumRadius: 4000)
+        .unitSystem(.metric)
         .build()
     
     return UINavigationController(rootViewController: LocationRadiusPickerController(configuration: config))
