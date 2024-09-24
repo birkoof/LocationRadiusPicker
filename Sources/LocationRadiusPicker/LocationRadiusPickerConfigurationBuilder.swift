@@ -157,6 +157,8 @@ public class LocationRadiusPickerConfigurationBuilder {
     /// Builds the configuration from the configured builder
     /// - Returns: configuration for the location radius picker
     public func build() -> LocationRadiusPickerConfiguration {
-        configuration
+        // ensure radius is within bounds
+        configuration.radius = min(max(configuration.minimumRadius, configuration.radius), configuration.maximumRadius)
+        return configuration
     }
 }

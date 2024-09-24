@@ -76,12 +76,8 @@ public final class LocationRadiusPickerController: UIViewController {
     public init(configuration: LocationRadiusPickerConfiguration) {
         self.configuration = configuration
         currentLocation = configuration.location
-        
-        // make sure radius is within bounds
-        let radius = min(max(configuration.minimumRadius, configuration.radius), configuration.maximumRadius)
-        currentRadius = radius
-        
-        circle = MKCircle(center: configuration.location, radius: radius)
+        currentRadius = configuration.radius
+        circle = MKCircle(center: configuration.location, radius: configuration.radius)
         
         isMetricSystem = switch configuration.unitSystem {
             case .metric: true
