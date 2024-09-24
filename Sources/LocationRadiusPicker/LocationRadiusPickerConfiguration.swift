@@ -54,4 +54,7 @@ public struct LocationRadiusPickerConfiguration {
     
     /// Whether the device vibrates (haptic feedback) when resizing the circle.
     var vibrateOnResize: Bool = true
+    
+    /// Padding around the radius circle. This value affects the bounding map rect, and is applied in combination with current radius.
+    var circlePadding: Double = 17.0
 }

@@ -143,6 +143,17 @@ public class LocationRadiusPickerConfigurationBuilder {
         return self
     }
     
+    /// Padding around the radius circle. This value affects the bounding map rect, and is applied in combination with current radius.
+    /// - Parameter padding: padding to apply to the circle
+    /// - Returns: updated builder
+    ///
+    /// - Note: Default value is 17. Allowed range is [0, 100].
+    public func circlePadding(_ padding: Double) -> LocationRadiusPickerConfigurationBuilder {
+        let padding = max(0, min(padding, 100))
+        configuration.circlePadding = padding
+        return self
+    }
+    
     /// Builds the configuration from the configured builder
     /// - Returns: configuration for the location radius picker
     public func build() -> LocationRadiusPickerConfiguration {

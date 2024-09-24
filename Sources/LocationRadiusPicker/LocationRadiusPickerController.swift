@@ -201,7 +201,7 @@ extension LocationRadiusPickerController: MKMapViewDelegate {
     }
     
     private func setVisibleMapRegionForCircle() {
-        let padding = currentRadius * 17 // TODO: include padding in the configuration
+        let padding = currentRadius * configuration.circlePadding
         let paddedRect = circle.boundingMapRect.insetBy(dx: -padding, dy: -padding)
         mapView.setVisibleMapRect(paddedRect, edgePadding: .zero, animated: false)
         
@@ -346,6 +346,7 @@ extension LocationRadiusPickerController {
 #Preview {
     let config = LocationRadiusPickerConfigurationBuilder(initialRadius: 300, minimumRadius: 30, maximumRadius: 4000)
         .unitSystem(.metric)
+        .circlePadding(25)
         .build()
     
     return UINavigationController(rootViewController: LocationRadiusPickerController(configuration: config))
