@@ -240,10 +240,14 @@ extension LocationRadiusPickerController {
         
         grabberView.center = locationInMap
         grabberView.center.x += diameter / 2
-        grabberView.isHidden = false
+        UIView.transition(with: self.grabberView, duration: 0.3, options: .transitionCrossDissolve) {
+            self.grabberView.isHidden = false
+        }
                 
         setRadiusLabelFrame()
-        radiusLabel.isHidden = false
+        UIView.transition(with: radiusLabel, duration: 0.3, options: .transitionCrossDissolve) {
+            self.radiusLabel.isHidden = false
+        }
     }
     
     private func hideGrabberView() {
