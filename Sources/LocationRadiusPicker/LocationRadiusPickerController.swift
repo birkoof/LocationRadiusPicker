@@ -269,7 +269,14 @@ extension LocationRadiusPickerController {
 
 extension LocationRadiusPickerController {
     @objc private func onCancelButtonPressed() {
-        dismiss(animated: true)
+        if let navigationController, navigationController.viewControllers.count > 1 {
+            // view controller has been pushed onto the navigation stack
+            navigationController.popViewController(animated: true)
+            return
+        }
+            
+        // view controller has been presented
+        presentingViewController?.dismiss(animated: true)
     }
     
     @objc private func handleGrabberViewPan(_ gesture: UIPanGestureRecognizer) {
