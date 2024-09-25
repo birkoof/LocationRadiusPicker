@@ -38,6 +38,16 @@ class ViewController: UIViewController {
 
 extension ViewController {
     private func setup() {
+        title = "Demo"
+        
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithDefaultBackground()
+        appearance.backgroundColor = .black.withAlphaComponent(0.6)
+        
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.tintColor = .red
+
         view.addSubview(openPickerButton)
         
         NSLayoutConstraint.activate([
@@ -51,6 +61,12 @@ extension ViewController {
 
 extension ViewController {
     private func onOpenPickerButtonPressed() {
-        present(LocationRadiusPickerController(), animated: true)
+        let configuration = LocationRadiusPickerConfigurationBuilder(initialRadius: 100, minimumRadius: 50, maximumRadius: 2000)
+            .cancelButtonTitle("Cancel")
+            .circlePadding(20)
+            .overrideNavigationBarAppearance(false)
+            .build()
+        
+        navigationController?.pushViewController(LocationRadiusPickerController(configuration: configuration), animated: true)
     }
 }
