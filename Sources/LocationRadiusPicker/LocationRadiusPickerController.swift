@@ -323,8 +323,6 @@ extension LocationRadiusPickerController {
 
 extension LocationRadiusPickerController {
     private func updateRadiusLabel(with radius: Double) {
-        let measurement = Measurement<UnitLength>(value: currentRadius, unit: .meters)
-
         let formatter = MeasurementFormatter()
         formatter.unitStyle = .medium
         formatter.unitOptions = .naturalScale
@@ -336,6 +334,7 @@ extension LocationRadiusPickerController {
             formatter.numberFormatter.maximumFractionDigits = radius >= 804 ? 1 : 0
         }
         
+        let measurement = Measurement<UnitLength>(value: currentRadius, unit: .meters)
         radiusLabel.text = formatter.string(from: measurement)
     }
 }
@@ -346,7 +345,7 @@ extension LocationRadiusPickerController {
 #Preview {
     let config = LocationRadiusPickerConfigurationBuilder(initialRadius: 300, minimumRadius: 30, maximumRadius: 4000)
         .unitSystem(.metric)
-        .circlePadding(25)
+        .circlePadding(10)
         .build()
     
     return UINavigationController(rootViewController: LocationRadiusPickerController(configuration: config))
