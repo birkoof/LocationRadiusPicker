@@ -57,4 +57,8 @@ public struct LocationRadiusPickerConfiguration {
     
     /// Padding around the radius circle. This value affects the bounding map rect, and is applied in combination with current radius.
     var circlePadding: Double = 17.0
+    
+    /// Whether the controller applies custom appearance for the navigation bar. If pushing from another navigation controller, disable this to keep the same
+    /// navigation bar appearance.
+    var overrideNavigationBarAppearance: Bool = true
 }

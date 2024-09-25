@@ -115,12 +115,15 @@ extension LocationRadiusPickerController {
     private func setupNavigationBar() {
         title = configuration.title
         
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithDefaultBackground()
-        appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
-        navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        navigationController?.navigationBar.standardAppearance = appearance
-        navigationController?.navigationBar.tintColor = .label
+        if configuration.overrideNavigationBarAppearance {
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithDefaultBackground()
+            appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+            
+            navigationController?.navigationBar.scrollEdgeAppearance = appearance
+            navigationController?.navigationBar.standardAppearance = appearance
+            navigationController?.navigationBar.tintColor = .label
+        }
         
         let cancelButton = UIBarButtonItem(
             title: configuration.cancelButtonTitle,

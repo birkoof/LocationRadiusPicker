@@ -154,6 +154,15 @@ public class LocationRadiusPickerConfigurationBuilder {
         return self
     }
     
+    /// Whether the controller applies custom appearance for the navigation bar. This should be disabled if you want to keep the navigation bar appearance
+    /// from the navigation controller that pushes the LocationRadiusPicker.
+    /// - Parameter override: picker applies custom appearance if set to true, otherwise keeps the appearance from the navigation controller that pushes it
+    /// - Returns: updated builder
+    public func overrideNavigationBarAppearance(_ override: Bool) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.overrideNavigationBarAppearance = override
+        return self
+    }
+    
     /// Builds the configuration from the configured builder
     /// - Returns: configuration for the location radius picker
     public func build() -> LocationRadiusPickerConfiguration {
