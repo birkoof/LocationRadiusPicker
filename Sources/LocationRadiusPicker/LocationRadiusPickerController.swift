@@ -60,7 +60,7 @@ public final class LocationRadiusPickerController: UIViewController {
     private var grabberCenterBeforePan: CGPoint = .zero
     private var radiusBeforePan = 0.0
     private var currentMetersPerPixel = 0.0
-
+    private var completion: (_ location: CLLocationCoordinate2D, _ radius: CLLocationDistance) -> (Void)
     private var currentRadius: CLLocationDistance {
         didSet {
             updateRadiusLabel(with: currentRadius)
@@ -73,8 +73,13 @@ public final class LocationRadiusPickerController: UIViewController {
     
     // MARK: - Init
     
-    public init(configuration: LocationRadiusPickerConfiguration) {
+    public init(
+        configuration: LocationRadiusPickerConfiguration,
+        completion: @escaping (_ location: CLLocationCoordinate2D, _ radius: CLLocationDistance) -> (Void)
+    ) {
         self.configuration = configuration
+        self.completion = completion
+        
         currentLocation = configuration.location
         currentRadius = configuration.radius
         circle = MKCircle(center: configuration.location, radius: configuration.radius)
@@ -133,6 +138,15 @@ extension LocationRadiusPickerController {
         )
         
         navigationItem.setLeftBarButton(cancelButton, animated: false)
+        
+        let saveButton = UIBarButtonItem(
+            title: configuration.saveButtonTitle,
+            style: .plain,
+            target: self,
+            action: #selector(onSaveButtonPressed)
+        )
+        
+        navigationItem.setRightBarButton(saveButton, animated: false)
     }
     
     private func setupSubviews() {
@@ -269,14 +283,12 @@ extension LocationRadiusPickerController {
 
 extension LocationRadiusPickerController {
     @objc private func onCancelButtonPressed() {
-        if let navigationController, navigationController.viewControllers.count > 1 {
-            // view controller has been pushed onto the navigation stack
-            navigationController.popViewController(animated: true)
-            return
-        }
-            
-        // view controller has been presented
-        presentingViewController?.dismiss(animated: true)
+        popOrDismissPicker()
+    }
+    
+    @objc private func onSaveButtonPressed() {
+        completion(currentLocation, currentRadius)
+        popOrDismissPicker()
     }
     
     @objc private func handleGrabberViewPan(_ gesture: UIPanGestureRecognizer) {
@@ -332,6 +344,17 @@ extension LocationRadiusPickerController {
 // MARK: - Helper
 
 extension LocationRadiusPickerController {
+    private func popOrDismissPicker() {
+        if let navigationController, navigationController.viewControllers.count > 1 {
+            // view controller has been pushed onto the navigation stack
+            navigationController.popViewController(animated: true)
+            return
+        }
+            
+        // view controller has been presented
+        presentingViewController?.dismiss(animated: true)
+    }
+    
     private func updateRadiusLabel(with radius: Double) {
         let formatter = MeasurementFormatter()
         formatter.unitStyle = .medium
@@ -358,5 +381,9 @@ extension LocationRadiusPickerController {
         .circlePadding(10)
         .build()
     
-    return UINavigationController(rootViewController: LocationRadiusPickerController(configuration: config))
+    let picker = LocationRadiusPickerController(configuration: config) { location, radius in
+        print(location, radius)
+    }
+    
+    return UINavigationController(rootViewController: picker)
 }
