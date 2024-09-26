@@ -54,13 +54,15 @@ public final class LocationRadiusPickerController: UIViewController {
     
     private var circle: MKCircle
     private var currentLocation: CLLocationCoordinate2D
+    private var completion: (_ location: CLLocationCoordinate2D, _ radius: CLLocationDistance) -> (Void)
+
     private var currentGeolocation: String = ""
     private var isFirstMapRender = true
     private var circleCenterBeforePan: CGPoint = .zero
     private var grabberCenterBeforePan: CGPoint = .zero
     private var radiusBeforePan = 0.0
     private var currentMetersPerPixel = 0.0
-    private var completion: (_ location: CLLocationCoordinate2D, _ radius: CLLocationDistance) -> (Void)
+
     private var currentRadius: CLLocationDistance {
         didSet {
             updateRadiusLabel(with: currentRadius)
