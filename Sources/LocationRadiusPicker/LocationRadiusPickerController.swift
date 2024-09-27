@@ -54,7 +54,7 @@ public final class LocationRadiusPickerController: UIViewController {
     
     private var circle: MKCircle
     private var currentLocation: CLLocationCoordinate2D
-    private var completion: (_ location: CLLocationCoordinate2D, _ radius: CLLocationDistance) -> (Void)
+    private var completion: (_ result: LocationRadiusPickerResult) -> (Void)
 
     private var currentGeolocation: String = ""
     private var isFirstMapRender = true
@@ -62,6 +62,7 @@ public final class LocationRadiusPickerController: UIViewController {
     private var grabberCenterBeforePan: CGPoint = .zero
     private var radiusBeforePan = 0.0
     private var currentMetersPerPixel = 0.0
+    private var selectedAnnotation: (any MKAnnotation)?
 
     private var currentRadius: CLLocationDistance {
         didSet {
@@ -75,10 +76,7 @@ public final class LocationRadiusPickerController: UIViewController {
     
     // MARK: - Init
     
-    public init(
-        configuration: LocationRadiusPickerConfiguration,
-        completion: @escaping (_ location: CLLocationCoordinate2D, _ radius: CLLocationDistance) -> (Void)
-    ) {
+    public init(configuration: LocationRadiusPickerConfiguration, completion: @escaping (_ result: LocationRadiusPickerResult) -> (Void)) {
         self.configuration = configuration
         self.completion = completion
         
@@ -156,6 +154,11 @@ extension LocationRadiusPickerController {
         
         mapView.addOverlay(circle)
         setVisibleMapRegionForCircle()
+        
+        // gesture for long press to select location
+        let locationSelectGesture = UILongPressGestureRecognizer(target: self, action: #selector(onMapLongPressed(_:)))
+        locationSelectGesture.delegate = self
+        mapView.addGestureRecognizer(locationSelectGesture)
     }
     
     private func setupConstraints() {
@@ -215,6 +218,33 @@ extension LocationRadiusPickerController: MKMapViewDelegate {
         view.addSubview(radiusLabel)
     }
     
+    public func mapView(_ mapView: MKMapView, viewFor annotation: any MKAnnotation) -> MKAnnotationView? {
+        if annotation is MKUserLocation { return nil }
+        
+        let pin = MKAnnotationView(annotation: annotation, reuseIdentifier: CustomMapPinAnnotationView.reuseIdentifier)
+        pin.image = UIImage(resource: .defaultMapPin) // TODO: add to configuration
+        pin.canShowCallout = true
+        pin.rightCalloutAccessoryView = selectLocationButton()
+        return pin
+    }
+    
+    public func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        guard let selectedAnnotation else { return }
+        
+        mapView.removeOverlay(circle)
+
+        currentLocation = selectedAnnotation.coordinate
+        if let title = selectedAnnotation.title {
+            currentGeolocation = title ?? ""
+        }
+        
+        circle = MKCircle(center: currentLocation, radius: currentRadius)
+        mapView.addOverlay(circle)
+        setVisibleMapRegionForCircle()
+        
+        mapView.removeAnnotation(selectedAnnotation)
+    }
+    
     private func setVisibleMapRegionForCircle() {
         let padding = currentRadius * configuration.circlePadding
         let paddedRect = circle.boundingMapRect.insetBy(dx: -padding, dy: -padding)
@@ -235,6 +265,21 @@ extension LocationRadiusPickerController: MKMapViewDelegate {
         
         let distanceInMeters = leftCoordinate.distance(from: rightCoordinate)
         return distanceInMeters / Double(mapWidthInPixels)
+    }
+    
+    func selectLocationButton() -> UIButton {
+        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 70, height: 30))
+        
+        // TODO: add title and text color to configuration
+        button.setTitle("Select", for: UIControl.State())
+        button.setTitleColor(configuration.radiusBorderColor, for: UIControl.State())
+        
+        if let titleLabel = button.titleLabel {
+            let width = titleLabel.textRect(forBounds: CGRect(x: 0, y: 0, width: Int.max, height: 30), limitedToNumberOfLines: 1).width
+            button.frame.size = CGSize(width: width, height: 30.0)
+        }
+        
+        return button
     }
 }
 
@@ -289,8 +334,28 @@ extension LocationRadiusPickerController {
     }
     
     @objc private func onSaveButtonPressed() {
-        completion(currentLocation, currentRadius)
+        let result = LocationRadiusPickerResult(location: currentLocation, radius: currentRadius, geolocation: currentGeolocation)
+        completion(result)
         popOrDismissPicker()
+    }
+    
+    @objc private func onMapLongPressed(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began else { return }
+        
+        if let selectedAnnotation {
+            mapView.removeAnnotation(selectedAnnotation)
+        }
+        
+        let coordinates = mapView.convert(gesture.location(in: mapView), toCoordinateFrom: mapView)
+
+        if let annotation = CustomMapPinAnnotationView.add(
+            to: mapView,
+            coordinate: coordinates,
+            title: "Street 123b" // TODO: fetch & store geolocation here
+        ) {
+            mapView.selectAnnotation(annotation, animated: true)
+            selectedAnnotation = annotation
+        }
     }
     
     @objc private func handleGrabberViewPan(_ gesture: UIPanGestureRecognizer) {
@@ -343,6 +408,17 @@ extension LocationRadiusPickerController {
     }
 }
 
+// MARK: - UIGestureRecognizerDelegate
+
+extension LocationRadiusPickerController: UIGestureRecognizerDelegate {
+    public func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        false
+    }
+}
+
 // MARK: - Helper
 
 extension LocationRadiusPickerController {
@@ -383,8 +459,8 @@ extension LocationRadiusPickerController {
         .circlePadding(10)
         .build()
     
-    let picker = LocationRadiusPickerController(configuration: config) { location, radius in
-        print(location, radius)
+    let picker = LocationRadiusPickerController(configuration: config) { result in
+        print(result)
     }
     
     return UINavigationController(rootViewController: picker)
