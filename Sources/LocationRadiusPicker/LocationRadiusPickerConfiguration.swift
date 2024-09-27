@@ -61,4 +61,13 @@ public struct LocationRadiusPickerConfiguration {
     /// Whether the controller applies custom appearance for the navigation bar. If pushing from another navigation controller, disable this to keep the same
     /// navigation bar appearance.
     var overrideNavigationBarAppearance: Bool = true
+    
+    /// The annotation image displayed when user long presses on a map in order to select a location. If none set, a default image will be used.
+    var mapPinImage: UIImage?
+    
+    /// The text of the select button on the map callout when user long presses a location.
+    var calloutSelectButtonText: String = "Select"
+    
+    /// The text color of the select button on the map callout when user long presses a location.
+    var calloutSelectButtonTextColor: UIColor = .systemBlue
 }

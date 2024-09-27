@@ -163,6 +163,30 @@ public class LocationRadiusPickerConfigurationBuilder {
         return self
     }
     
+    /// The annotation image displayed when user long presses on a map in order to select a location. If none set, a default image will be used.
+    /// - Parameter image: the image to be used on the annotation
+    /// - Returns: updated builder
+    public func mapPinImage(_ image: UIImage) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.mapPinImage = image
+        return self
+    }
+    
+    /// The text of the select button on the map callout when user long presses a location.
+    /// - Parameter text: text of the button
+    /// - Returns: updated builder
+    public func calloutSelectButtonText(_ text: String) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.calloutSelectButtonText = text
+        return self
+    }
+    
+    /// The text color of the select button on the map callout when user long presses a location.
+    /// - Parameter color: text color of the button
+    /// - Returns: updated builder
+    public func calloutSelectButtonTextColor(_ color: UIColor) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.calloutSelectButtonTextColor = color
+        return self
+    }
+    
     /// Builds the configuration from the configured builder
     /// - Returns: configuration for the location radius picker
     public func build() -> LocationRadiusPickerConfiguration {

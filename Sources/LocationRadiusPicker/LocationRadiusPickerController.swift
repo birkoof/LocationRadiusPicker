@@ -222,7 +222,7 @@ extension LocationRadiusPickerController: MKMapViewDelegate {
         if annotation is MKUserLocation { return nil }
         
         let pin = MKAnnotationView(annotation: annotation, reuseIdentifier: CustomMapPinAnnotationView.reuseIdentifier)
-        pin.image = UIImage(resource: .defaultMapPin) // TODO: add to configuration
+        pin.image = configuration.mapPinImage ?? UIImage(resource: .defaultMapPin)
         pin.canShowCallout = true
         pin.rightCalloutAccessoryView = selectLocationButton()
         return pin
@@ -269,10 +269,8 @@ extension LocationRadiusPickerController: MKMapViewDelegate {
     
     func selectLocationButton() -> UIButton {
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 70, height: 30))
-        
-        // TODO: add title and text color to configuration
-        button.setTitle("Select", for: UIControl.State())
-        button.setTitleColor(configuration.radiusBorderColor, for: UIControl.State())
+        button.setTitle(configuration.calloutSelectButtonText, for: UIControl.State())
+        button.setTitleColor(configuration.calloutSelectButtonTextColor, for: UIControl.State())
         
         if let titleLabel = button.titleLabel {
             let width = titleLabel.textRect(forBounds: CGRect(x: 0, y: 0, width: Int.max, height: 30), limitedToNumberOfLines: 1).width
