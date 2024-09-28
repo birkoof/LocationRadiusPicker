@@ -88,4 +88,16 @@ public struct LocationRadiusPickerConfiguration {
     
     /// The corner style of the save button.
     var saveButtonCornerStyle: UIButton.Configuration.CornerStyle = .capsule
+
+    /// Whether the controller includes search functionality
+    var searchFunctionality: Bool = true
+    
+    /// Whether the controller shows search history
+    var showSearchHistory: Bool = true
+    
+    /// Text of the header label that sits above recent searches.
+    var historyHeaderText: String = "Previously searched"
+    
+    /// Placeholder text for the search bar.
+    var searchBarPlaceholder: String = "Search or Enter Address"
 }

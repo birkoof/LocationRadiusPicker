@@ -75,11 +75,12 @@ public final class LocationRadiusPickerController: UIViewController {
     // MARK: - Private properties
         
     private let isMetricSystem: Bool
+    private let completion: (_ result: LocationRadiusPickerResult) -> (Void)
     private let geocoder = CLGeocoder()
+    private let historyManager = LocationSearchHistoryManager()
     
     private var circle: MKCircle
     private var currentLocation: CLLocationCoordinate2D
-    private var completion: (_ result: LocationRadiusPickerResult) -> (Void)
 
     private var isFirstMapRender = true
     private var circleCenterBeforePan: CGPoint = .zero
@@ -87,6 +88,8 @@ public final class LocationRadiusPickerController: UIViewController {
     private var radiusBeforePan = 0.0
     private var currentMetersPerPixel = 0.0
     private var selectedAnnotation: (any MKAnnotation)?
+    private var localSearch: MKLocalSearch?
+    private var searchTimer: Timer?
 
     private var currentRadius: CLLocationDistance {
         didSet {
@@ -99,6 +102,47 @@ public final class LocationRadiusPickerController: UIViewController {
             saveButton.configuration?.subtitle = currentGeolocation
         }
     }
+    
+    private lazy var searchResultsController: LocationSearchResultsController = {
+        let headerText = configuration.showSearchHistory ? configuration.historyHeaderText : ""
+        
+        let results = LocationSearchResultsController(previouslySearchedText: headerText)
+        results.onSelectLocation = { [weak self] location in
+            guard let self else { return }
+            
+            dismiss(animated: true)
+            mapView.removeOverlay(circle)
+            
+            currentLocation = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+            circle = MKCircle(center: currentLocation, radius: currentRadius)
+            mapView.addOverlay(circle)
+            setVisibleMapRegionForCircle()
+            currentGeolocation = location.address
+            searchBar.text = ""
+            
+            historyManager.addToHistory(location)
+        }
+        
+        results.onDeleteLocation = { [weak self] location in
+            self?.historyManager.remove(location)
+        }
+        
+        return results
+    }()
+    
+    private lazy var searchController: UISearchController = {
+        let search = UISearchController(searchResultsController: self.searchResultsController)
+        search.searchResultsUpdater = self
+        search.hidesNavigationBarDuringPresentation = false
+        return search
+    }()
+    
+    private lazy var searchBar: UISearchBar = {
+        let view = searchController.searchBar
+        view.delegate = self
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     // MARK: - Public properties
     
@@ -183,6 +227,11 @@ extension LocationRadiusPickerController {
             )
             
             navigationItem.setRightBarButton(saveButton, animated: false)
+        }
+        
+        if configuration.searchFunctionality {
+            navigationItem.searchController = searchController
+            searchBar.placeholder = configuration.searchBarPlaceholder
         }
     }
     
@@ -495,6 +544,92 @@ extension LocationRadiusPickerController: UIGestureRecognizerDelegate {
         shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
     ) -> Bool {
         false
+    }
+}
+
+// MARK: - Searching
+
+extension LocationRadiusPickerController: UISearchResultsUpdating {
+    public func updateSearchResults(for searchController: UISearchController) {
+        guard let term = searchController.searchBar.text else { return }
+        
+        searchTimer?.invalidate()
+
+        let searchTerm = term.trimmingCharacters(in: CharacterSet.whitespaces)
+        
+        if searchTerm.isEmpty {
+            searchResultsController.locations = configuration.showSearchHistory ? historyManager.history() : []
+            searchResultsController.isShowingHistory = true
+            searchResultsController.tableView.reloadData()
+            return
+        }
+        
+        showItemsForSearchResult(nil)
+        
+        searchTimer = Timer.scheduledTimer(
+            timeInterval: 0.2,
+            target: self, selector: #selector(searchFromTimer(_:)),
+            userInfo: ["SearchTermKey": searchTerm],
+            repeats: false
+        )
+    }
+    
+    @objc func searchFromTimer(_ timer: Timer) {
+        guard let userInfo = timer.userInfo as? [String: AnyObject], let term = userInfo["SearchTermKey"] as? String else { return }
+        
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = term
+        
+        localSearch?.cancel()
+        localSearch = MKLocalSearch(request: request)
+        localSearch!.start { response, _ in
+            self.showItemsForSearchResult(response)
+        }
+    }
+    
+    func showItemsForSearchResult(_ searchResult: MKLocalSearch.Response?) {
+        searchResultsController.locations = searchResult?.mapItems.map { resultItem in
+            let latitude = resultItem.placemark.coordinate.latitude
+            let longitude = resultItem.placemark.coordinate.longitude
+            
+            let description = {
+                guard let postalAddress = resultItem.placemark.postalAddress else {
+                    return "\(latitude), \(longitude)"
+                }
+                
+                return CNPostalAddressFormatter().string(from: postalAddress)
+                    .split(separator: "\n")
+                    .joined(separator: ", ")
+            }()
+            
+            return Location(
+                name: resultItem.name ?? "",
+                address: description,
+                longitude: longitude,
+                latitude: latitude
+            )
+        } ?? []
+        
+        searchResultsController.isShowingHistory = false
+        searchResultsController.tableView.reloadData()
+    }
+}
+
+// MARK: - Search bar delegate
+
+extension LocationRadiusPickerController: UISearchBarDelegate {
+    public func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        if let text = searchBar.text, text.isEmpty {
+            // forces the history to be visible when user clicks on the search bar
+            searchBar.text = " "
+        }
+    }
+    
+    public func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            // forces the history to be visible as long as the focus is on the search bar
+            searchBar.text = " "
+        }
     }
 }
 

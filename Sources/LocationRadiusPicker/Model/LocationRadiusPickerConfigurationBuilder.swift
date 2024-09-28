@@ -243,6 +243,38 @@ public class LocationRadiusPickerConfigurationBuilder {
         return self
     }
     
+    /// Whether to enable search functionality
+    /// - Parameter show: enables the search functionality if set to true, otherwise disables it
+    /// - Returns: updated builder
+    public func searchFunctionality(_ enabled: Bool) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.searchFunctionality = enabled
+        return self
+    }
+    
+    /// Whether to store & show the search history
+    /// - Parameter show: enables search history if set to true, otherwise disables it
+    /// - Returns: updated builder
+    public func showSearchHistory(_ show: Bool) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.showSearchHistory = show
+        return self
+    }
+    
+    /// Placeholder text for the search bar.
+    /// - Parameter text: placeholder text for the search bar
+    /// - Returns: updated builder
+    public func searchBarPlaceholder(_ text: String) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.searchBarPlaceholder = text
+        return self
+    }
+    
+    /// Text of the header label that sits above recent searches.
+    /// - Parameter text: history header text
+    /// - Returns: updated builder
+    public func historyHeaderText(_ text: String) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.historyHeaderText = text
+        return self
+    }
+    
     /// Builds the configuration from the configured builder
     /// - Returns: configuration for the location radius picker
     public func build() -> LocationRadiusPickerConfiguration {
