@@ -5,11 +5,15 @@
 //  Created by Eman Basic on 28.09.24.
 //
 
-import Foundation
+import MapKit
 
 struct Location: Equatable {
-    let name: String
-    let address: String
-    let longitude: Double
-    let latitude: Double
+    var name: String
+    var address: String
+    var longitude: Double
+    var latitude: Double
+ 
+    func toCoordinates() -> CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
 }

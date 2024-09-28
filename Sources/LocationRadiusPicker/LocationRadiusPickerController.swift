@@ -65,7 +65,13 @@ public final class LocationRadiusPickerController: UIViewController {
         
         let view = UIButton(configuration: config)
         view.addAction(UIAction { [unowned self] _ in
-            completion(LocationRadiusPickerResult(location: currentLocation, radius: currentRadius, geolocation: currentGeolocation))
+            let result = LocationRadiusPickerResult(
+                location: currentLocation.toCoordinates(),
+                radius: currentRadius,
+                geolocation: currentLocation.address
+            )
+            
+            completion(result)
             popOrDismissPicker()
         }, for: .touchUpInside)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -76,11 +82,11 @@ public final class LocationRadiusPickerController: UIViewController {
         
     private let isMetricSystem: Bool
     private let completion: (_ result: LocationRadiusPickerResult) -> (Void)
+    
     private let geocoder = CLGeocoder()
     private let historyManager = LocationSearchHistoryManager()
     
     private var circle: MKCircle
-    private var currentLocation: CLLocationCoordinate2D
 
     private var isFirstMapRender = true
     private var circleCenterBeforePan: CGPoint = .zero
@@ -97,9 +103,9 @@ public final class LocationRadiusPickerController: UIViewController {
         }
     }
     
-    private var currentGeolocation: String = "" {
+    private var currentLocation: Location {
         didSet {
-            saveButton.configuration?.subtitle = currentGeolocation
+            saveButton.configuration?.subtitle = currentLocation.address
         }
     }
     
@@ -113,11 +119,10 @@ public final class LocationRadiusPickerController: UIViewController {
             dismiss(animated: true)
             mapView.removeOverlay(circle)
             
-            currentLocation = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
-            circle = MKCircle(center: currentLocation, radius: currentRadius)
+            currentLocation = location
+            circle = MKCircle(center: location.toCoordinates(), radius: currentRadius)
             mapView.addOverlay(circle)
             setVisibleMapRegionForCircle()
-            currentGeolocation = location.address
             searchBar.text = ""
             
             historyManager.addToHistory(location)
@@ -154,7 +159,7 @@ public final class LocationRadiusPickerController: UIViewController {
         self.configuration = configuration
         self.completion = completion
         
-        currentLocation = configuration.location
+        currentLocation = Location(name: "", address: "", longitude: configuration.location.longitude, latitude: configuration.location.latitude)
         currentRadius = configuration.radius
         circle = MKCircle(center: configuration.location, radius: configuration.radius)
         
@@ -191,8 +196,8 @@ extension LocationRadiusPickerController {
         setupConstraints()
         
         // fetch geolocation for initial location
-        fetchGeolocation(for: currentLocation) { [weak self] geolocation in
-            self?.currentGeolocation = geolocation
+        fetchGeolocation(for: currentLocation.toCoordinates()) { [weak self] geolocation in
+            self?.currentLocation.address = geolocation
         }
     }
     
@@ -331,12 +336,16 @@ extension LocationRadiusPickerController: MKMapViewDelegate {
         
         mapView.removeOverlay(circle)
 
-        currentLocation = selectedAnnotation.coordinate
+        currentLocation.latitude = selectedAnnotation.coordinate.latitude
+        currentLocation.longitude = selectedAnnotation.coordinate.longitude
+        
         if let title = selectedAnnotation.title {
-            currentGeolocation = title ?? ""
+            currentLocation.address = title ?? ""
+        } else {
+            currentLocation.address = ""
         }
         
-        circle = MKCircle(center: currentLocation, radius: currentRadius)
+        circle = MKCircle(center: selectedAnnotation.coordinate, radius: currentRadius)
         mapView.addOverlay(circle)
         setVisibleMapRegionForCircle()
         
@@ -430,7 +439,12 @@ extension LocationRadiusPickerController {
     }
     
     @objc private func onSaveButtonPressed() {
-        let result = LocationRadiusPickerResult(location: currentLocation, radius: currentRadius, geolocation: currentGeolocation)
+        let result = LocationRadiusPickerResult(
+            location: currentLocation.toCoordinates(),
+            radius: currentRadius,
+            geolocation: currentLocation.address
+        )
+        
         completion(result)
         popOrDismissPicker()
     }
@@ -496,7 +510,7 @@ extension LocationRadiusPickerController {
         if gesture.state == .ended || gesture.state == .cancelled || gesture.state == .failed {
             grabberView.isHidden = true
             radiusLabel.isHidden = true
-            circle = MKCircle(center: currentLocation, radius: currentRadius)
+            circle = MKCircle(center: currentLocation.toCoordinates(), radius: currentRadius)
             mapView.addOverlay(circle)
             circleView.isHidden = true
             setVisibleMapRegionForCircle()
