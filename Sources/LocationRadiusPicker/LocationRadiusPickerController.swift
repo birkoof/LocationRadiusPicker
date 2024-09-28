@@ -49,6 +49,29 @@ public final class LocationRadiusPickerController: UIViewController {
         return view
     }()
     
+    private lazy var saveButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        config.title = configuration.saveButtonTitle
+        config.cornerStyle = configuration.saveButtonCornerStyle
+        config.contentInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
+        config.baseBackgroundColor = configuration.saveButtonBackgroundColor
+        config.baseForegroundColor = configuration.saveButtonTextColor
+        config.titleAlignment = .center
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = UIFont.systemFont(ofSize: 17, weight: .bold)
+            return outgoing
+        }
+        
+        let view = UIButton(configuration: config)
+        view.addAction(UIAction { [unowned self] _ in
+            completion(LocationRadiusPickerResult(location: currentLocation, radius: currentRadius, geolocation: currentGeolocation))
+            popOrDismissPicker()
+        }, for: .touchUpInside)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     // MARK: - Private properties
         
     private let isMetricSystem: Bool
@@ -58,7 +81,6 @@ public final class LocationRadiusPickerController: UIViewController {
     private var currentLocation: CLLocationCoordinate2D
     private var completion: (_ result: LocationRadiusPickerResult) -> (Void)
 
-    private var currentGeolocation: String = ""
     private var isFirstMapRender = true
     private var circleCenterBeforePan: CGPoint = .zero
     private var grabberCenterBeforePan: CGPoint = .zero
@@ -69,6 +91,12 @@ public final class LocationRadiusPickerController: UIViewController {
     private var currentRadius: CLLocationDistance {
         didSet {
             updateRadiusLabel(with: currentRadius)
+        }
+    }
+    
+    private var currentGeolocation: String = "" {
+        didSet {
+            saveButton.configuration?.subtitle = currentGeolocation
         }
     }
     
@@ -138,7 +166,7 @@ extension LocationRadiusPickerController {
         }
         
         let cancelButton = UIBarButtonItem(
-            title: configuration.cancelButtonTitle,
+            title: configuration.navigationBarCancelButtonTitle,
             style: .plain,
             target: self,
             action: #selector(onCancelButtonPressed)
@@ -146,18 +174,24 @@ extension LocationRadiusPickerController {
         
         navigationItem.setLeftBarButton(cancelButton, animated: false)
         
-        let saveButton = UIBarButtonItem(
-            title: configuration.saveButtonTitle,
-            style: .plain,
-            target: self,
-            action: #selector(onSaveButtonPressed)
-        )
-        
-        navigationItem.setRightBarButton(saveButton, animated: false)
+        if configuration.showNavigationBarSaveButton {
+            let saveButton = UIBarButtonItem(
+                title: configuration.navigationBarSaveButtonTitle,
+                style: .plain,
+                target: self,
+                action: #selector(onSaveButtonPressed)
+            )
+            
+            navigationItem.setRightBarButton(saveButton, animated: false)
+        }
     }
     
     private func setupSubviews() {
         view.addSubview(mapView)
+        
+        if configuration.showSaveButton {
+            view.addSubview(saveButton)
+        }
         
         mapView.addOverlay(circle)
         setVisibleMapRegionForCircle()
@@ -175,6 +209,14 @@ extension LocationRadiusPickerController {
             mapView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+        
+        if configuration.showSaveButton {
+            NSLayoutConstraint.activate([
+                saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+                saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+                saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30)
+            ])
+        }
     }
 }
 

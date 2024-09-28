@@ -13,11 +13,14 @@ public struct LocationRadiusPickerConfiguration {
     /// The title displayed on the navigation bar.
     var title: String = "Location Radius Picker"
     
-    /// The title displayed on the save button.
-    var saveButtonTitle: String = "Save"
+    /// The title displayed on the save button (on the navigation bar).
+    var navigationBarSaveButtonTitle: String = "Save"
     
-    /// The title displayed on the cancel button.
-    var cancelButtonTitle: String = "Cancel"
+    /// Whether the save button on the navigation bar will be displayed.
+    var showNavigationBarSaveButton: Bool = true
+    
+    /// The title displayed on the cancel button (on the navigation bar).
+    var navigationBarCancelButtonTitle: String = "Cancel"
     
     /// The initial radius of the circle (in meters).
     var radius: CLLocationDistance
@@ -70,4 +73,19 @@ public struct LocationRadiusPickerConfiguration {
     
     /// The text color of the select button on the map callout when user long presses a location.
     var calloutSelectButtonTextColor: UIColor = .systemBlue
+    
+    /// Whether the save button will be shown at the bottom of the controller.
+    var showSaveButton: Bool = true
+    
+    /// The title of the save button
+    var saveButtonTitle: String = "Save"
+    
+    /// The background color of the save button.
+    var saveButtonBackgroundColor: UIColor = .systemBlue
+    
+    /// The text color of the save button.
+    var saveButtonTextColor: UIColor = .white
+    
+    /// The corner style of the save button.
+    var saveButtonCornerStyle: UIButton.Configuration.CornerStyle = .capsule
 }

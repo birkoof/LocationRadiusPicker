@@ -27,7 +27,7 @@ public class LocationRadiusPickerConfigurationBuilder {
     /// - Parameter title: title of the picker
     /// - Returns: updated builder
     ///
-    /// - Note: Default value: **"Location Radius Picker"** (not localised).
+    /// - Note: Default value: **"Location Radius Picker"** (not localized).
     public func title(_ title: String) -> LocationRadiusPickerConfigurationBuilder {
         configuration.title = title
         return self
@@ -37,9 +37,17 @@ public class LocationRadiusPickerConfigurationBuilder {
     /// - Parameter title: title of the save button
     /// - Returns: updated builder
     ///
-    /// - Note: Default value: **"Save"** (not localised).
-    public func saveButtonTitle(_ title: String) -> LocationRadiusPickerConfigurationBuilder {
-        configuration.saveButtonTitle = title
+    /// - Note: Default value: **"Save"** (not localized).
+    public func navigationBarSaveButtonTitle(_ title: String) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.navigationBarSaveButtonTitle = title
+        return self
+    }
+    
+    /// Whether the save button on the navigation bar will be displayed.
+    /// - Parameter show: shows the button if set to true, otherwise hides it
+    /// - Returns: updated builder
+    public func showNavigationBarSaveButton(_ show: Bool) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.showNavigationBarSaveButton = show
         return self
     }
     
@@ -47,9 +55,9 @@ public class LocationRadiusPickerConfigurationBuilder {
     /// - Parameter title: title of the cancel button
     /// - Returns: updated builder
     ///
-    /// - Note: Default value: **"Cancel"** (not localised).
+    /// - Note: Default value: **"Cancel"** (not localized).
     public func cancelButtonTitle(_ title: String) -> LocationRadiusPickerConfigurationBuilder {
-        configuration.cancelButtonTitle = title
+        configuration.navigationBarCancelButtonTitle = title
         return self
     }
     
@@ -184,6 +192,54 @@ public class LocationRadiusPickerConfigurationBuilder {
     /// - Returns: updated builder
     public func calloutSelectButtonTextColor(_ color: UIColor) -> LocationRadiusPickerConfigurationBuilder {
         configuration.calloutSelectButtonTextColor = color
+        return self
+    }
+    
+    /// Whether the save button will be shown at the bottom of the controller.
+    /// - Parameter show: shows the button if set to true, otherwise hides it
+    /// - Returns: updated builder
+    public func showSaveButton(_ show: Bool) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.showSaveButton = show
+        return self
+    }
+    
+    /// Title of the save button.
+    /// - Parameter title: title of the save button
+    /// - Returns: updated builder
+    ///
+    /// - Note: Default value: **"Save"** (not localized).
+    public func saveButtonTitle(_ title: String) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.saveButtonTitle = title
+        return self
+    }
+    
+    /// The background color of the save button.
+    /// - Parameter color: background color
+    /// - Returns: updated builder
+    ///
+    /// - Note: Default value: **UIColor.systemBlue**.
+    public func saveButtonBackgroundColor(_ color: UIColor) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.saveButtonBackgroundColor = color
+        return self
+    }
+
+    /// The text color of the save button.
+    /// - Parameter color: text color
+    /// - Returns: updated builder
+    ///
+    /// - Note: Default value: **UIColor.white**.
+    public func saveButtonTextColor(_ color: UIColor) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.saveButtonTextColor = color
+        return self
+    }
+    
+    /// The corner style of the save button.
+    /// - Parameter style: corner style
+    /// - Returns: updated builder
+    ///
+    /// - Note: Default value: **UIButton.Configuration.CornerStyle.capsule**.
+    public func saveButtonCornerStyle(_ style: UIButton.Configuration.CornerStyle) -> LocationRadiusPickerConfigurationBuilder {
+        configuration.saveButtonCornerStyle = style
         return self
     }
     
