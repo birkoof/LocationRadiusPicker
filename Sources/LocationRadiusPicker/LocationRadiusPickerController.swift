@@ -5,6 +5,7 @@
 //  Created by Eman Basic on 08.09.24.
 //
 
+import Contacts
 import MapKit
 import UIKit
 
@@ -51,6 +52,7 @@ public final class LocationRadiusPickerController: UIViewController {
     // MARK: - Private properties
         
     private let isMetricSystem: Bool
+    private let geocoder = CLGeocoder()
     
     private var circle: MKCircle
     private var currentLocation: CLLocationCoordinate2D
@@ -115,6 +117,11 @@ extension LocationRadiusPickerController {
         setupNavigationBar()
         setupSubviews()
         setupConstraints()
+        
+        // fetch geolocation for initial location
+        fetchGeolocation(for: currentLocation) { [weak self] geolocation in
+            self?.currentGeolocation = geolocation
+        }
     }
     
     private func setupNavigationBar() {
@@ -346,11 +353,11 @@ extension LocationRadiusPickerController {
         
         let coordinates = mapView.convert(gesture.location(in: mapView), toCoordinateFrom: mapView)
 
-        if let annotation = CustomMapPinAnnotationView.add(
-            to: mapView,
-            coordinate: coordinates,
-            title: "Street 123b" // TODO: fetch & store geolocation here
-        ) {
+        fetchGeolocation(for: coordinates) { [weak self] geolocation in
+            guard let self, let annotation = CustomMapPinAnnotationView.add(to: mapView, coordinate: coordinates, title: geolocation) else {
+                return
+            }
+            
             mapView.selectAnnotation(annotation, animated: true)
             selectedAnnotation = annotation
         }
@@ -402,6 +409,38 @@ extension LocationRadiusPickerController {
             mapView.addOverlay(circle)
             circleView.isHidden = true
             setVisibleMapRegionForCircle()
+        }
+    }
+}
+
+// MARK: - Geolocation
+
+extension LocationRadiusPickerController {
+    private func fetchGeolocation(for coordinates: CLLocationCoordinate2D, completion: @escaping (String) -> Void) {
+        let location = CLLocation(latitude: coordinates.latitude, longitude: coordinates.longitude)
+        
+        geocoder.cancelGeocode()
+        geocoder.reverseGeocodeLocation(location) { placemarks, error in
+            if let error = error as NSError?, error.code != CLError.Code.geocodeCanceled.rawValue {
+                // only ignore geocode cancelled errors, but stop on other errors
+                return
+            }
+            
+            guard let placemark = placemarks?.first else { return }
+            
+            let address = {
+                guard let postalAddress = placemark.postalAddress else {
+                    return "\(coordinates.latitudeToString()), \(coordinates.longitudeToString())"
+                }
+                
+                return CNPostalAddressFormatter().string(from: postalAddress)
+                    .split(separator: "\n")
+                    .joined(separator: ", ")
+            }()
+                        
+            DispatchQueue.main.async {
+                completion(address)
+            }
         }
     }
 }
