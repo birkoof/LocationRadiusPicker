@@ -65,14 +65,7 @@ public final class LocationRadiusPickerController: UIViewController {
         
         let view = UIButton(configuration: config)
         view.addAction(UIAction { [unowned self] _ in
-            let result = LocationRadiusPickerResult(
-                location: currentLocation.toCoordinates(),
-                radius: currentRadius,
-                geolocation: currentLocation.address
-            )
-            
-            completion(result)
-            popOrDismissPicker()
+            onSaveButtonPressed()
         }, for: .touchUpInside)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
