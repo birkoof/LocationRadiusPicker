@@ -51,9 +51,9 @@ public final class LocationRadiusPickerController: UIViewController {
     
     private lazy var saveButton: UIButton = {
         var config = UIButton.Configuration.filled()
+        config.buttonSize = .large
         config.title = configuration.saveButtonTitle
         config.cornerStyle = configuration.saveButtonCornerStyle
-        config.contentInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
         config.baseBackgroundColor = configuration.saveButtonBackgroundColor
         config.baseForegroundColor = configuration.saveButtonTextColor
         config.titleAlignment = .center
