@@ -8,7 +8,7 @@
 import MapKit
 
 public struct LocationModel: Equatable {
-    var name: String
-    var address: String
-    var coordinates: LocationCoordinates
+    public var name: String
+    public var address: String
+    public var coordinates: LocationCoordinates
 }
