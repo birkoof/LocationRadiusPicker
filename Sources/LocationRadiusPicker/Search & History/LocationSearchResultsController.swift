@@ -16,9 +16,9 @@ final class LocationSearchResultsController: UITableViewController {
     
     // MARK: - Public properties
     
-    var locations: [Location] = []
-    var onSelectLocation: ((_ location: Location) -> Void)?
-    var onDeleteLocation: ((_ location: Location) -> Void)?
+    var locations: [LocationModel] = []
+    var onSelectLocation: ((_ location: LocationModel) -> Void)?
+    var onDeleteLocation: ((_ location: LocationModel) -> Void)?
     var isShowingHistory = false
     
     // MARK: - Init

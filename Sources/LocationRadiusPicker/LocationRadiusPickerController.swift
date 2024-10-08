@@ -96,7 +96,7 @@ public final class LocationRadiusPickerController: UIViewController {
         }
     }
     
-    private var currentLocation: Location {
+    private var currentLocation: LocationModel {
         didSet {
             saveButton.configuration?.subtitle = currentLocation.address
         }
@@ -113,11 +113,14 @@ public final class LocationRadiusPickerController: UIViewController {
             mapView.removeOverlay(circle)
             
             currentLocation = location
-            circle = MKCircle(center: location.toCoordinates(), radius: currentRadius)
+            circle = MKCircle(
+                center: CLLocationCoordinate2D(latitude: location.coordinates.latitude, longitude: location.coordinates.longitude),
+                radius: currentRadius
+            )
             mapView.addOverlay(circle)
+            
             setVisibleMapRegionForCircle()
             searchBar.text = ""
-            
             historyManager.addToHistory(location)
         }
         
@@ -152,9 +155,12 @@ public final class LocationRadiusPickerController: UIViewController {
         self.configuration = configuration
         self.completion = completion
         
-        currentLocation = Location(name: "", address: "", longitude: configuration.location.longitude, latitude: configuration.location.latitude)
+        currentLocation = LocationModel(name: "", address: "", coordinates: configuration.location)
         currentRadius = configuration.radius
-        circle = MKCircle(center: configuration.location, radius: configuration.radius)
+        circle = MKCircle(
+            center: CLLocationCoordinate2D(latitude: configuration.location.latitude, longitude: configuration.location.longitude),
+            radius: configuration.radius
+        )
         
         isMetricSystem = switch configuration.unitSystem {
             case .metric: true
@@ -189,7 +195,7 @@ extension LocationRadiusPickerController {
         setupConstraints()
         
         // fetch geolocation for initial location
-        fetchGeolocation(for: currentLocation.toCoordinates()) { [weak self] geolocation in
+        fetchGeolocation(for: currentLocation.coordinates) { [weak self] geolocation in
             self?.currentLocation.address = geolocation
         }
     }
@@ -329,8 +335,7 @@ extension LocationRadiusPickerController: MKMapViewDelegate {
         
         mapView.removeOverlay(circle)
 
-        currentLocation.latitude = selectedAnnotation.coordinate.latitude
-        currentLocation.longitude = selectedAnnotation.coordinate.longitude
+        currentLocation.coordinates = LocationCoordinates(latitude: selectedAnnotation.coordinate.latitude, longitude: selectedAnnotation.coordinate.longitude)
         
         if let title = selectedAnnotation.title {
             currentLocation.address = title ?? ""
@@ -432,12 +437,7 @@ extension LocationRadiusPickerController {
     }
     
     @objc private func onSaveButtonPressed() {
-        let result = LocationRadiusPickerResult(
-            location: currentLocation.toCoordinates(),
-            radius: currentRadius,
-            geolocation: currentLocation.address
-        )
-        
+        let result = LocationRadiusPickerResult(location: currentLocation, radius: currentRadius)
         completion(result)
         popOrDismissPicker()
     }
@@ -451,7 +451,7 @@ extension LocationRadiusPickerController {
         
         let coordinates = mapView.convert(gesture.location(in: mapView), toCoordinateFrom: mapView)
 
-        fetchGeolocation(for: coordinates) { [weak self] geolocation in
+        fetchGeolocation(for: LocationCoordinates(latitude: coordinates.latitude, longitude: coordinates.longitude)) { [weak self] geolocation in
             guard let self, let annotation = CustomMapPinAnnotationView.add(to: mapView, coordinate: coordinates, title: geolocation) else {
                 return
             }
@@ -503,9 +503,14 @@ extension LocationRadiusPickerController {
         if gesture.state == .ended || gesture.state == .cancelled || gesture.state == .failed {
             grabberView.isHidden = true
             radiusLabel.isHidden = true
-            circle = MKCircle(center: currentLocation.toCoordinates(), radius: currentRadius)
-            mapView.addOverlay(circle)
             circleView.isHidden = true
+            
+            circle = MKCircle(
+                center: CLLocationCoordinate2D(latitude: currentLocation.coordinates.latitude, longitude: currentLocation.coordinates.longitude),
+                radius: currentRadius
+            )
+            
+            mapView.addOverlay(circle)
             setVisibleMapRegionForCircle()
         }
     }
@@ -514,7 +519,7 @@ extension LocationRadiusPickerController {
 // MARK: - Geolocation
 
 extension LocationRadiusPickerController {
-    private func fetchGeolocation(for coordinates: CLLocationCoordinate2D, completion: @escaping (String) -> Void) {
+    private func fetchGeolocation(for coordinates: LocationCoordinates, completion: @escaping (String) -> Void) {
         let location = CLLocation(latitude: coordinates.latitude, longitude: coordinates.longitude)
         
         geocoder.cancelGeocode()
@@ -609,11 +614,10 @@ extension LocationRadiusPickerController: UISearchResultsUpdating {
                     .joined(separator: ", ")
             }()
             
-            return Location(
+            return LocationModel(
                 name: resultItem.name ?? "",
                 address: description,
-                longitude: longitude,
-                latitude: latitude
+                coordinates: LocationCoordinates(latitude: latitude, longitude: longitude)
             )
         } ?? []
         
@@ -678,6 +682,7 @@ extension LocationRadiusPickerController {
     let config = LocationRadiusPickerConfigurationBuilder(initialRadius: 300, minimumRadius: 30, maximumRadius: 4000)
         .unitSystem(.metric)
         .circlePadding(10)
+        .showNavigationBarSaveButton(false)
         .build()
     
     let picker = LocationRadiusPickerController(configuration: config) { result in

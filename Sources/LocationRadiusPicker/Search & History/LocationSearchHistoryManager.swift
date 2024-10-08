@@ -23,12 +23,12 @@ struct LocationSearchHistoryManager {
     
     // MARK: - Public methods
     
-    func history() -> [Location] {
+    func history() -> [LocationModel] {
         let history = UserDefaults.standard.object(forKey: Keys.keyRecentLocations) as? [NSDictionary] ?? []
-        return history.compactMap(Location.fromHistoryDictionary)
+        return history.compactMap(LocationModel.fromHistoryDictionary)
     }
     
-    func addToHistory(_ location: Location) {
+    func addToHistory(_ location: LocationModel) {
         guard let dict = location.toHistoryDictionary() else { return }
         
         var history = UserDefaults.standard.object(forKey: Keys.keyRecentLocations) as? [NSDictionary] ?? []
@@ -41,7 +41,7 @@ struct LocationSearchHistoryManager {
         }
     }
     
-    func remove(_ location: Location) {
+    func remove(_ location: LocationModel) {
         var history = history()
         history.removeAll { $0 == location }
         UserDefaults.standard.set(history.compactMap { $0.toHistoryDictionary() }, forKey: Keys.keyRecentLocations)
@@ -50,21 +50,21 @@ struct LocationSearchHistoryManager {
 
 // MARK: - Extension over Location
 
-fileprivate extension Location {
+fileprivate extension LocationModel {
     private typealias Keys = LocationSearchHistoryManager.Keys
     
     func toHistoryDictionary() -> NSDictionary? {
         let dict: [String: AnyObject?] = [
             Keys.name: name as AnyObject,
             Keys.address: address as AnyObject,
-            Keys.longitude: longitude as AnyObject,
-            Keys.latitude: latitude as AnyObject
+            Keys.longitude: coordinates.longitude as AnyObject,
+            Keys.latitude: coordinates.latitude as AnyObject
         ]
         
         return dict as NSDictionary?
     }
     
-    static func fromHistoryDictionary(_ dict: NSDictionary) -> Location? {
+    static func fromHistoryDictionary(_ dict: NSDictionary) -> LocationModel? {
         guard let name = dict[Keys.name] as? String,
               let address = dict[Keys.address] as? String,
               let longitude = dict[Keys.longitude] as? Double,
@@ -73,6 +73,10 @@ fileprivate extension Location {
             return nil
         }
         
-        return Location(name: name, address: address, longitude: longitude, latitude: latitude)
+        return LocationModel(
+            name: name,
+            address: address,
+            coordinates: LocationCoordinates(latitude: latitude, longitude: longitude)
+        )
     }
 }

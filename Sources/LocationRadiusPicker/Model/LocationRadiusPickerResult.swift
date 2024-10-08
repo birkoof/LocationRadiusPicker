@@ -5,17 +5,18 @@
 //  Created by Eman Basic on 27.09.24.
 //
 
-import CoreLocation
-
 public struct LocationRadiusPickerResult: CustomDebugStringConvertible {
-    /// The geographic location of the circle's center
-    public let location: CLLocationCoordinate2D
+    /// The location properties of the circle's center
+    public let location: LocationModel
     /// The radius of the circle in meters
-    public let radius: CLLocationDistance
-    /// Geocoded address of the circle location
-    public let geolocation: String
+    public let radius: Double
     
     public var debugDescription: String {
-        "Radius: \(radius); Latitude: \(location.latitude)°, Longitude: \(location.longitude)°; Geolocation: \(geolocation.isEmpty ? "-" : geolocation)"
+        let geolocation = location.name.isEmpty ? "" : location.name + (location.address.isEmpty ? "" : location.address)
+        return """
+        Radius: \(radius);
+        Latitude: \(location.coordinates.latitude)°, Longitude: \(location.coordinates.longitude)°;
+        Geolocation: \(geolocation.isEmpty ? "-" : geolocation)
+        """
     }
 }

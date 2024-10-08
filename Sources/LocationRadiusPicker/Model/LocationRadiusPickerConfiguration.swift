@@ -5,7 +5,6 @@
 //  Created by Eman Basic on 16.09.24.
 //
 
-import CoreLocation
 import UIKit
 
 /// Defines the configuration for the Location Radius Picker
@@ -23,7 +22,7 @@ public struct LocationRadiusPickerConfiguration {
     var navigationBarCancelButtonTitle: String = "Cancel"
     
     /// The initial radius of the circle (in meters).
-    var radius: CLLocationDistance
+    var radius: Double
     
     /// The minimum allowable radius of the circle (in meters).
     var minimumRadius: Double
@@ -32,7 +31,7 @@ public struct LocationRadiusPickerConfiguration {
     var maximumRadius: Double
     
     /// The initial geographic location of the circle's center, defined by latitude and longitude.
-    var location: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 37.331711, longitude: -122.030773)
+    var location: LocationCoordinates = LocationCoordinates(latitude: 37.331711, longitude: -122.030773)
     
     /// The color of the circle's border (outline).
     var radiusBorderColor: UIColor = .systemBlue
@@ -78,7 +77,7 @@ public struct LocationRadiusPickerConfiguration {
     var showSaveButton: Bool = true
     
     /// The title of the save button
-    var saveButtonTitle: String = "Save"
+    var saveButtonTitle: String = "Select location"
     
     /// The background color of the save button.
     var saveButtonBackgroundColor: UIColor = .systemBlue

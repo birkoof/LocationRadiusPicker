@@ -5,7 +5,6 @@
 //  Created by Eman Basic on 16.09.24.
 //
 
-import CoreLocation
 import UIKit
 
 /// Builder for LocationRadiusPickerConfiguration
@@ -66,7 +65,7 @@ public class LocationRadiusPickerConfigurationBuilder {
     /// - Returns: updated builder
     ///
     /// - Note: Default value: **Apple Inc. - Infinite Loop Campus** (Lat: 37.331711, Lon: -122.030773)
-    public func initialLocation(_ location: CLLocationCoordinate2D) -> LocationRadiusPickerConfigurationBuilder {
+    public func initialLocation(_ location: LocationCoordinates) -> LocationRadiusPickerConfigurationBuilder {
         configuration.location = location
         return self
     }
@@ -207,7 +206,7 @@ public class LocationRadiusPickerConfigurationBuilder {
     /// - Parameter title: title of the save button
     /// - Returns: updated builder
     ///
-    /// - Note: Default value: **"Save"** (not localized).
+    /// - Note: Default value: **"Select location"** (not localized).
     public func saveButtonTitle(_ title: String) -> LocationRadiusPickerConfigurationBuilder {
         configuration.saveButtonTitle = title
         return self
