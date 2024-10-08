@@ -12,7 +12,15 @@ public struct LocationRadiusPickerResult: CustomDebugStringConvertible {
     public let radius: Double
     
     public var debugDescription: String {
-        let geolocation = location.name.isEmpty ? "" : location.name + (location.address.isEmpty ? "" : location.address)
+        var geolocation = location.name.isEmpty ? "" : location.name
+        if !location.address.isEmpty {
+            if geolocation.isEmpty {
+                geolocation = location.address
+            } else {
+                geolocation = ", " + location.address
+            }
+        }
+        
         return """
         Radius: \(radius);
         Latitude: \(location.coordinates.latitude)°, Longitude: \(location.coordinates.longitude)°;
