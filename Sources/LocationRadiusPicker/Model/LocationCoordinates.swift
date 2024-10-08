@@ -8,8 +8,8 @@
 import Foundation
 
 public struct LocationCoordinates: Equatable {
-    var latitude: Double
-    var longitude: Double
+    public let latitude: Double
+    public let longitude: Double
 }
 
 extension LocationCoordinates {
