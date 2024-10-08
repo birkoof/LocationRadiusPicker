@@ -40,14 +40,6 @@ extension ViewController {
     private func setup() {
         title = "Demo"
         
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithDefaultBackground()
-        appearance.backgroundColor = .black.withAlphaComponent(0.6)
-        
-        navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        navigationController?.navigationBar.standardAppearance = appearance
-        navigationController?.navigationBar.tintColor = .red
-
         view.addSubview(openPickerButton)
         
         NSLayoutConstraint.activate([
@@ -62,11 +54,40 @@ extension ViewController {
 extension ViewController {
     private func onOpenPickerButtonPressed() {
         let configuration = LocationRadiusPickerConfigurationBuilder(initialRadius: 100, minimumRadius: 50, maximumRadius: 2000)
+            .title("Location Radius Picker")
+            .navigationBarSaveButtonTitle("Save")
+            .showNavigationBarSaveButton(true)
             .cancelButtonTitle("Cancel")
-            .circlePadding(20)
-            .overrideNavigationBarAppearance(false)
+            .initialLocation(LocationCoordinates(latitude: 37.331711, longitude: -122.030773))
+            .radiusBorderColor(.systemBlue)
+            .radiusBorderWidth(3)
+            .radiusColor(.systemBlue.withAlphaComponent(0.3))
+            .radiusLabelColor(.label)
+            .grabberColor(.systemBlue)
+            .grabberSize(20)
+            .unitSystem(.system)
+            .vibrateOnResize(true)
+            .circlePadding(17)
+            .overrideNavigationBarAppearance(true)
+            // .mapPinImage(UIImage(named: "mapPin"))
+            .calloutSelectButtonText("Select")
+            .calloutSelectButtonTextColor(.systemBlue)
+            .showSaveButton(true)
+            .saveButtonTitle("Select location")
+            .saveButtonBackgroundColor(.systemBlue)
+            .saveButtonTextColor(.white)
+            .saveButtonCornerStyle(.capsule)
+            .searchFunctionality(true)
+            .showSearchHistory(true)
+            .historyHeaderText("Previously searched")
+            .searchBarPlaceholder("Search or Enter Address")
             .build()
         
-        navigationController?.pushViewController(LocationRadiusPickerController(configuration: configuration), animated: true)
+        let picker = LocationRadiusPickerController(configuration: configuration) { result in
+            print(result)
+        }
+        
+        // navigationController?.pushViewController(picker, animated: true)
+        present(UINavigationController(rootViewController: picker), animated: true)
     }
 }
