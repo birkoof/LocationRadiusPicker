@@ -191,7 +191,7 @@ extension ViewController {
             .vibrateOnResize(true)
             .circlePadding(17)
             .overrideNavigationBarAppearance(true)
-            // .mapPinImage(UIImage(named: "mapPin"))
+            .mapPinImage(UIImage(resource: .mapPin))
             .calloutSelectButtonText("Select")
             .calloutSelectButtonTextColor(.systemBlue)
             .showSaveButton(true)
