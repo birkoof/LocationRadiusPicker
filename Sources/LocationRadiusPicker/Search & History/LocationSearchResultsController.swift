@@ -79,7 +79,6 @@ extension LocationSearchResultsController {
     }
     
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        guard indexPath.section == 1 else { return nil }
         guard onDeleteLocation != nil else { return nil }
         
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completion in
