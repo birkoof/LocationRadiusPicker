@@ -7,7 +7,6 @@
 
 import LocationRadiusPicker
 import UIKit
-import MapKit
 
 struct LocationRadiusModel: Hashable, Equatable {
     var id: UUID = UUID()
@@ -15,6 +14,12 @@ struct LocationRadiusModel: Hashable, Equatable {
     var longitude: Double
     var radius: Double
     var name: String
+    
+    var formattedTitle: String {
+        guard name.isEmpty else { return name }
+        
+        return String(format: "Lat: %.5f°; Lon: %.5f°", latitude, longitude)
+    }
 }
 
 class ViewController: UIViewController {
@@ -75,7 +80,7 @@ class ViewController: UIViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "LocationCell", for: indexPath)
         
         var config = UIListContentConfiguration.valueCell()
-        config.text = item.name
+        config.text = item.formattedTitle
         config.secondaryText = radiusFormatter.string(from: Measurement<UnitLength>(value: item.radius, unit: .meters))
         
         cell.contentConfiguration = config
