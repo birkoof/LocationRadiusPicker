@@ -23,7 +23,7 @@ class ViewController: UIViewController {
     
     private lazy var tableView: UITableView = {
         let view = UITableView()
-        view.register(UITableViewCell.self, forCellReuseIdentifier: "MyCell")
+        view.register(UITableViewCell.self, forCellReuseIdentifier: "LocationCell")
         view.delegate = self
         view.contentInset.bottom = 100
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -72,7 +72,7 @@ class ViewController: UIViewController {
     }()
     
     private lazy var dataSource: UITableViewDiffableDataSource<Int, LocationRadiusModel> = UITableViewDiffableDataSource(tableView: tableView) { [unowned self] tableView, indexPath, item in
-        let cell = tableView.dequeueReusableCell(withIdentifier: "MyCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "LocationCell", for: indexPath)
         
         var config = UIListContentConfiguration.valueCell()
         config.text = item.name
@@ -131,7 +131,7 @@ extension ViewController {
 // MARK: - Table view
 
 extension ViewController: UITableViewDelegate {
-    private func applySnapshot() {
+    private func applySnapshot(animated: Bool = true) {
         var snapshot = NSDiffableDataSourceSnapshot<Int, LocationRadiusModel>()
         snapshot.appendSections([0])
         snapshot.appendItems(items)
@@ -139,7 +139,7 @@ extension ViewController: UITableViewDelegate {
         emptyViewArrowImage.isHidden = !items.isEmpty
         emptyViewTitleLabel.isHidden = !items.isEmpty
         
-        dataSource.apply(snapshot, animatingDifferences: true)
+        dataSource.apply(snapshot, animatingDifferences: animated)
     }
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
@@ -217,12 +217,12 @@ extension ViewController {
                 // update
                 newItem.id = item.id
                 self?.items[index] = newItem
+                self?.applySnapshot(animated: false)
             } else {
                 // create
                 self?.items.append(newItem)
+                self?.applySnapshot()
             }
-            
-            self?.applySnapshot()
         }
         
         // navigationController?.pushViewController(picker, animated: true)
