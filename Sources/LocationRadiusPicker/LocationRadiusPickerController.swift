@@ -485,7 +485,7 @@ extension LocationRadiusPickerController {
         } else {
             // allow resize
             grabberView.center.x = newGrabberPosition
-            currentRadius = newRadius
+            currentRadius = newRadius.rounded(.toNearestOrEven)
             
             if configuration.vibrateOnResize, newRadius.truncatingRemainder(dividingBy: 3).rounded() == 0 {
                 // vibrate on pan
