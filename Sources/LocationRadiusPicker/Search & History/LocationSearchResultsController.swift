@@ -50,10 +50,7 @@ extension LocationSearchResultsController {
         tableView.register(cell: LocationSearchResultCell.self)
         tableView.separatorStyle = .none
         tableView.backgroundColor = .secondarySystemBackground
-        
-        if previouslySearchedText.isEmpty {
-            tableView.contentInset.top = 10
-        }
+        tableView.contentInset.top = 10
     }
 }
 
